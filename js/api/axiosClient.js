@@ -29,7 +29,17 @@ axiosClient.interceptors.response.use(
     return response.data;
   },
   function (error) {
-    return Promise.reject(error);
+    console.log('axiosClient response error', error.response);
+    if (!error.response) throw new error('Do something when wrong');
+
+    //redirect login if not login
+    if (error.response.status === 401) {
+      window.location.assign('/login.html');
+      return;
+    }
+
+    // return Promise.reject(error);
+    throw new error(error);
   }
 );
 export default axiosClient;
