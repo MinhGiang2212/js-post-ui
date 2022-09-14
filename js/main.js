@@ -49,6 +49,24 @@ function renderPostList(postList) {
   });
 }
 
+function renderPagination(pagination) {
+  const ulPagination = document.getElementById('pagination');
+  if (!pagination || !ulPagination) return;
+  //calc totalPages
+  const { _page, _limit, _totalRows } = pagination;
+  const totalPages = Math.ceil(_totalRows / _limit);
+
+  //save page and totalPages to ulPagination
+  ulPagination.dataset.pages = _page;
+  ulPagination.dataset.totalPages = totalPages;
+  //check if enable/disable click event for prev/next pagination
+  if (_page <= 1) ulPagination.firstElementChild?.classList.add('disabled');
+  else ulPagination.firstElementChild?.classList.remove('disabled');
+
+  if (_page >= totalPages) ulPagination.lastElementChild?.classList.add('disabled');
+  else ulPagination.lastElementChild?.classList.remove('disabled');
+}
+
 function handlerFilterChange(filterName, filterValue) {
   //update query params
   const url = new URL(window.location);
@@ -89,6 +107,7 @@ function initURL() {
   const url = new URL(window.location);
 
   //update search params if needed
+  //set default query params
   if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
   if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6);
 
@@ -97,7 +116,6 @@ function initURL() {
 
 (async () => {
   initPagination();
-  //set default query params if not exist
   initURL();
 
   try {
@@ -105,7 +123,9 @@ function initURL() {
     const { data, pagination } = await postApi.getAll(queryParams);
 
     renderPostList(data);
+    renderPagination(pagination);
   } catch (error) {
     console.log('get all failed', error);
+    //show modal
   }
 })();
