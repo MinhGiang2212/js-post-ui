@@ -38,7 +38,6 @@ function createPostElement(post) {
 }
 
 function renderPostList(postList) {
-  console.log(postList);
   if (!Array.isArray(postList) || postList.length === 0) return;
 
   const ulElement = document.getElementById('postsList');
@@ -50,12 +49,59 @@ function renderPostList(postList) {
   });
 }
 
+function handlerFilterChange(filterName, filterValue) {
+  //update query params
+  const url = new URL(window.location);
+  url.searchParams.set(filterName, filterValue);
+  window.history.pushState({}, '', url);
+
+  //fetch API
+  //re-render post list
+}
+
+function handlerNextPagination(event) {
+  event.preventDefault();
+}
+
+function handlerPrevPagination(event) {
+  event.preventDefault();
+}
+
+function initPagination() {
+  //bind click event for prev/next pagination
+  const ulPagination = document.getElementById('pagination');
+  if (!ulPagination) return;
+
+  //add click event for prev pagination
+  const prevLink = ulPagination.firstElementChild?.firstElementChild;
+  if (prevLink) {
+    prevLink.addEventListener('click', handlerPrevPagination);
+  }
+
+  //add click event for next pagination
+  const nextLink = ulPagination.lastElementChild?.firstElementChild;
+  if (nextLink) {
+    nextLink.addEventListener('click', handlerNextPagination);
+  }
+}
+
+function initURL() {
+  const url = new URL(window.location);
+
+  //update search params if needed
+  if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
+  if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6);
+
+  window.history.pushState({}, '', url);
+}
+
 (async () => {
+  initPagination();
+  //set default query params if not exist
+  initURL();
+
   try {
-    const queryParams = {
-      _page: 1,
-      _limit: 6,
-    };
+    const queryParams = new URLSearchParams(window.location.search);
     const { data, pagination } = await postApi.getAll(queryParams);
 
     renderPostList(data);
