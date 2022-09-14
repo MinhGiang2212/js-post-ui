@@ -1,20 +1,55 @@
 import postApi from './api/postApi';
+import { setTextContent } from './utils';
 
-async function main() {
+function createPostElement(post) {
+  if (!post) return;
+  try {
+    //find, clone template
+    const postTemplate = document.getElementById('postTemplate');
+    if (!postTemplate) return;
+
+    const liElement = postTemplate.content.firstElementChild.cloneNode(true);
+    if (!liElement) return;
+
+    //update thumbnail, title, description, author
+    const thumbnailElement = liElement.querySelector('[data-id="thumbnail"]');
+    if (thumbnailElement) thumbnailElement.src = post.imageUrl;
+
+    setTextContent(liElement, '[data-id="title"]', post.title);
+    setTextContent(liElement, '[data-id="description"]', post.title);
+    setTextContent(liElement, '[data-id="author"]', post.author);
+
+    //attach events
+
+    return liElement;
+  } catch (error) {
+    console.log('failed to create post item', error);
+  }
+}
+
+function renderPostList(postList) {
+  console.log(postList);
+  if (!Array.isArray(postList) || postList.length === 0) return;
+
+  const ulElement = document.getElementById('postsList');
+  if (!ulElement) return;
+
+  postList.forEach((post) => {
+    const liElement = createPostElement(post);
+    ulElement.appendChild(liElement);
+  });
+}
+
+(async () => {
   try {
     const queryParams = {
       _page: 1,
-      _limit: 5,
+      _limit: 6,
     };
-    const data = await postApi.getAll(queryParams);
-    console.log('mainjs data', data);
+    const { data, pagination } = await postApi.getAll(queryParams);
+
+    renderPostList(data);
   } catch (error) {
     console.log('get all failed', error);
   }
-
-  await postApi.update({
-    id: 'lea2aa9l7x3a5tg',
-    title: 'Iure aperiam unde456',
-  });
-}
-main();
+})();
