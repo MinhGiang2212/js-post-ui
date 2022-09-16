@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "dayjs": "^1.11.5"
+    "dayjs": "^1.11.5",
+    "debounce": "^1.2.1",
+    "lodash": "^4.17.21"
   }
 }
