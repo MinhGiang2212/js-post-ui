@@ -168,16 +168,21 @@ function initSearch() {
 }
 
 (async () => {
-  //add event for search input
-  initSearch();
-  //add click event for links
-  initPagination();
-  //set default pagination(_page, _limit) on URL
-  initURL();
-
   try {
+    const url = new URL(window.location);
+
+    //update search params if needed
+    if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
+    if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6);
+
+    window.history.pushState({}, '', url);
+    const queryParams = url.searchParams;
+
+    //add click event for links
+    initPagination();
+    initSearch();
+
     //render post list based URL params
-    const queryParams = new URLSearchParams(window.location.search);
     const { data, pagination } = await postApi.getAll(queryParams);
     renderPostList(data);
     renderPagination(pagination);
