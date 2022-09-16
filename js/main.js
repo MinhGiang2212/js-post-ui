@@ -138,17 +138,6 @@ function initPagination() {
   }
 }
 
-function initURL() {
-  const url = new URL(window.location);
-
-  //update search params if needed
-
-  if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
-  if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6);
-
-  window.history.pushState({}, '', url);
-}
-
 function initSearch() {
   const searchInput = document.getElementById('searchInput');
   if (!searchInput) return;
