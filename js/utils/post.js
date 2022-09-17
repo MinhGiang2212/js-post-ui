@@ -21,6 +21,8 @@ export function createPostElement(post) {
     thumbnailElement.src = post.imageUrl;
 
     thumbnailElement.addEventListener('error', () => {
+      console.log('post image error');
+
       thumbnailElement.src = 'https://via.placeholder.com/1368x400?text=thumbnail';
     });
   }
@@ -32,6 +34,13 @@ export function createPostElement(post) {
   setTextContent(liElement, '[data-id="timeSpan"]', `- ${dayjs(post.updatedAt).fromNow()}`);
 
   //attach events
+  //go to post detail when click on div.postItem
+  const divElement = liElement.firstElementChild;
+  if (divElement) {
+    divElement.addEventListener('click', () => {
+      window.location.assign(`post-detail.html?id=${post.id}`);
+    });
+  }
 
   return liElement;
 }
