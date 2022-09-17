@@ -1,75 +1,6 @@
 import postApi from './api/postApi';
-import { getUlPagination, setTextContent, truncateText } from './utils';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import { renderPagination, renderPostList, registerPagination, registerSearchInput } from './utils';
 import debounce from 'debounce';
-
-//to use fromNow func
-dayjs.extend(relativeTime);
-
-function createPostElement(post) {
-  if (!post) return;
-
-  //find, clone template
-  const postTemplate = document.getElementById('postTemplate');
-  if (!postTemplate) return;
-
-  const liElement = postTemplate.content.firstElementChild.cloneNode(true);
-  if (!liElement) return;
-
-  //update thumbnail, title, description, author
-  const thumbnailElement = liElement.querySelector('[data-id="thumbnail"]');
-  if (thumbnailElement) {
-    thumbnailElement.src = post.imageUrl;
-
-    thumbnailElement.addEventListener('error', () => {
-      thumbnailElement.src = 'https://via.placeholder.com/1368x400?text=thumbnail';
-    });
-  }
-
-  setTextContent(liElement, '[data-id="title"]', post.title);
-  setTextContent(liElement, '[data-id="description"]', truncateText(post.description, 100));
-  setTextContent(liElement, '[data-id="author"]', post.author);
-  //calculate timespan
-  setTextContent(liElement, '[data-id="timeSpan"]', `- ${dayjs(post.updatedAt).fromNow()}`);
-
-  //attach events
-
-  return liElement;
-}
-
-function renderPostList(postList) {
-  if (!Array.isArray(postList)) return;
-
-  const ulElement = document.getElementById('postsList');
-  if (!ulElement) return;
-
-  //clear post list
-  ulElement.textContent = '';
-
-  postList.forEach((post) => {
-    const liElement = createPostElement(post);
-    ulElement.appendChild(liElement);
-  });
-}
-
-function renderPagination(pagination) {
-  const ulPagination = getUlPagination();
-  if (!pagination || !ulPagination) return;
-  //calc totalPages
-  const { _page, _limit, _totalRows } = pagination;
-  const totalPages = Math.ceil(_totalRows / _limit);
-
-  //save page and totalPages to ulPagination
-  ulPagination.dataset.page = _page;
-  ulPagination.dataset.totalPages = totalPages;
-  //check if enable/disable click event for prev/next pagination
-  if (_page <= 1) ulPagination.firstElementChild?.classList.add('disabled');
-  else ulPagination.firstElementChild?.classList.remove('disabled');
-
-  if (_page >= totalPages) ulPagination.lastElementChild?.classList.add('disabled');
-  else ulPagination.lastElementChild?.classList.remove('disabled');
-}
 
 async function handlerFilterChange(filterName, filterValue) {
   try {
@@ -85,77 +16,14 @@ async function handlerFilterChange(filterName, filterValue) {
     // fetch API
     // re-render post list
     const { data, pagination } = await postApi.getAll(url.searchParams);
-
-    renderPostList(data);
-    renderPagination(pagination);
+    renderPostList('postList', data);
+    renderPagination('pagination', pagination);
   } catch (error) {
     console.log('falied to fetch post list', error);
   }
 }
 
-function handlerNextPagination(event) {
-  console.log('next pagination');
-  event.preventDefault();
-
-  const ulPagination = getUlPagination();
-  if (!ulPagination) return;
-
-  const page = Number.parseInt(ulPagination.dataset.page) || 1;
-  const totalPages = ulPagination.dataset.totalPages;
-  if (page >= totalPages) return;
-
-  handlerFilterChange('_page', page + 1);
-}
-
-function handlerPrevPagination(event) {
-  console.log('prev pagination');
-  event.preventDefault();
-
-  const ulPagination = getUlPagination();
-  if (!ulPagination) return;
-
-  const page = Number.parseInt(ulPagination.dataset.page) || 1;
-  if (page <= 1) return;
-
-  handlerFilterChange('_page', page - 1);
-}
-
-function initPagination() {
-  //bind click event for prev/next pagination
-  const ulPagination = getUlPagination();
-  if (!ulPagination) return;
-
-  //add click event for prev pagination
-  const prevLink = ulPagination.firstElementChild?.firstElementChild;
-  if (prevLink) {
-    prevLink.addEventListener('click', handlerPrevPagination);
-  }
-
-  //add click event for next pagination
-  const nextLink = ulPagination.lastElementChild?.firstElementChild;
-  if (nextLink) {
-    nextLink.addEventListener('click', handlerNextPagination);
-  }
-}
-
-function initSearch() {
-  const searchInput = document.getElementById('searchInput');
-  if (!searchInput) return;
-
-  //set default values from query params
-  //title_like
-  const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.get('title_like')) {
-    searchInput.value = queryParams.get('title_like');
-  }
-  const debounceSearch = debounce(
-    (event) => handlerFilterChange('title_like', event.target.value),
-    500
-  );
-
-  searchInput.addEventListener('input', debounceSearch);
-}
-
+//MAIN
 (async () => {
   try {
     const url = new URL(window.location);
@@ -168,13 +36,21 @@ function initSearch() {
     const queryParams = url.searchParams;
 
     //add click event for links
-    initPagination();
-    initSearch();
+    registerPagination({
+      elementId: 'pagination',
+      defaultParams: queryParams,
+      onChange: (page) => handlerFilterChange('_page', page),
+    });
+    registerSearchInput({
+      elementId: 'searchInput',
+      defaultParams: queryParams,
+      onChange: (value) => handlerFilterChange('title_like', value),
+    });
 
     //render post list based URL params
     const { data, pagination } = await postApi.getAll(queryParams);
-    renderPostList(data);
-    renderPagination(pagination);
+    renderPostList('postList', data);
+    renderPagination('pagination', pagination);
   } catch (error) {
     console.log('get all failed', error);
     //show modal
