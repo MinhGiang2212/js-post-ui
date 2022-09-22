@@ -1,4 +1,5 @@
 import postApi from './api/postApi';
+import { initPostForm } from './utils';
 
 //MAIN
 (async () => {
@@ -11,9 +12,14 @@ import postApi from './api/postApi';
           title: '',
           descripttion: '',
           author: '',
-          imageURL: '',
+          imageUrl: '',
         };
-    console.log(defaultValue);
+
+    initPostForm({
+      formId: 'postForm',
+      defaultValue,
+      onSubmit: (formValues) => console.log('submit', formValues),
+    });
   } catch (error) {
     console.log('failed to fetch post detail', error);
   }
