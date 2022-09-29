@@ -34,7 +34,7 @@ function getPostSchema() {
       .test(
         'at-least-two-worlds',
         'please end at least two worlds and each world is 3 characters ',
-        (value) => value.split(' ').filter((x) => !!x && x >= 3).length >= 2
+        (value) => value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
     description: yup.string(),
   });
@@ -83,16 +83,18 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
   if (!form) return;
 
   setFormValue(form, defaultValue);
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    console.log('submit');
 
     //get form values
     const formValues = getFormValues(form);
-    console.log('formvalues', formValues);
+    formValues.id = defaultValue.id;
+
     //validation
     //if valid trigger submit callback
     //otherwise, show validation errors
-    if (!validatePostForm(form, formValues)) return;
+    const isValid = await validatePostForm(form, formValues);
+    if (!isValid) return;
+    onSubmit?.(formValues);
   });
 }
