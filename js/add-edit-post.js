@@ -6,11 +6,11 @@ import { initPostForm } from './utils';
   try {
     const searchParams = new URLSearchParams(window.location.search);
     const postId = searchParams.get('id');
-    let defaultValue = Boolean(postApi)
+    let defaultValue = Boolean(postId)
       ? await postApi.getById(postId)
       : {
           title: '',
-          descripttion: '',
+          description: '',
           author: '',
           imageUrl: '',
         };
