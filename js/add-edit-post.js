@@ -16,10 +16,10 @@ async function handlerPostFormSubmit(formValues) {
     // console.log('redirect to ', savedPost);
     setTimeout(() => {
       window.location.assign(`/post-detail.html?id=${savedPost.id}`);
-    }, 3000);
+    }, 2000);
   } catch (error) {
     console.log('failed to save post', error);
-    toast.error(`Error :${error.message}`);
+    toast.error(`Error: ${error.message}`);
   }
 }
 //MAIN

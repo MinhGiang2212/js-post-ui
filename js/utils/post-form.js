@@ -77,14 +77,36 @@ async function validatePostForm(form, formValues) {
 
   return isValid;
 }
+function showLoading(form) {
+  const button = form.querySelector('[name="submit"]');
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Saving...';
+  }
+}
+function hideLoading(form) {
+  const button = form.querySelector('[name="submit"]');
+  if (button) {
+    button.disabled = false;
+    button.innerHTML = '<i class="fas fa-save mr-1"></i> Save';
+  }
+}
 
 export function initPostForm({ formId, defaultValue, onSubmit }) {
   const form = document.getElementById(formId);
   if (!form) return;
 
   setFormValue(form, defaultValue);
+
+  let submitted = false;
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    //prevent other submission
+    if (submitted) return;
+
+    showLoading(form);
+    submitted = true;
 
     //get form values
     const formValues = getFormValues(form);
@@ -95,6 +117,10 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
     //otherwise, show validation errors
     const isValid = await validatePostForm(form, formValues);
     if (!isValid) return;
-    onSubmit?.(formValues);
+
+    await onSubmit?.(formValues);
+
+    hideLoading(form);
+    submitted = false;
   });
 }
