@@ -135,7 +135,7 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
     //if valid trigger submit callback
     //otherwise, show validation errors
     const isValid = await validatePostForm(form, formValues);
-    if (!isValid) await onSubmit?.(formValues);
+    if (isValid) await onSubmit?.(formValues);
 
     //always hide loading no matter form is valid or not
     hideLoading(form);
