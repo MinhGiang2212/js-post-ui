@@ -24,3 +24,10 @@ export function setBackgroundImage(parent, selector, imageUrl) {
   const element = parent.querySelector(selector);
   if (element) element.style.backgroundImage = `url(${imageUrl})`;
 }
+
+export function randomNumber(n) {
+  if (!n) return;
+
+  const random = Math.random() * n;
+  return Math.trunc(random);
+}
