@@ -107,6 +107,22 @@ function initRadioImageSource(form) {
   });
 }
 
+function initUploadImage(form) {
+  const uploadImage = form.querySelector('[id="uploadImage"]');
+  if (!uploadImage) return;
+
+  uploadImage.addEventListener('change', (event) => {
+    console.log('upload image', event.target.files[0]);
+
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+
+      setBackgroundImage(document, '#postHeroImage', imageUrl);
+    }
+  });
+}
+
 function showLoading(form) {
   const button = form.querySelector('[name="submit"]');
   if (button) {
@@ -132,6 +148,7 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
   //init events
   initRandomImage(form);
   initRadioImageSource(form);
+  initUploadImage(form);
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();

@@ -1,7 +1,7 @@
 import postApi from './api/postApi';
 import { initPostForm, toast } from './utils';
 async function handlerPostFormSubmit(formValues) {
-  // console.log('submit from parent', formValues);
+  console.log('submit from parent', formValues);
   try {
     //check add/edit post
     //S1: check id on URL(search params)
