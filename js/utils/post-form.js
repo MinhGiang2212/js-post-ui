@@ -79,7 +79,7 @@ async function validatePostForm(form, formValues) {
   return isValid;
 }
 
-function initRandomImages(form) {
+function initRandomImage(form) {
   const randomButton = document.getElementById('postChangeImage');
   if (!randomButton) return;
 
@@ -90,6 +90,20 @@ function initRandomImages(form) {
     setFieldValue(form, '[name="imageUrl"]', imageUrl);
 
     setBackgroundImage(document, '#postHeroImage', imageUrl);
+  });
+}
+
+function renderImageSource(form, selectedValue) {
+  const controlList = form.querySelectorAll('[data-id="imageSource"]');
+  controlList.forEach((control) => {
+    control.hidden = control.dataset.imageSource !== selectedValue;
+  });
+}
+
+function initRadioImageSource(form) {
+  const radioList = form.querySelectorAll('[name="imageSource"]');
+  radioList.forEach((radio) => {
+    radio.addEventListener('change', (event) => renderImageSource(form, event.target.value));
   });
 }
 
@@ -104,7 +118,7 @@ function hideLoading(form) {
   const button = form.querySelector('[name="submit"]');
   if (button) {
     button.disabled = false;
-    button.innerHTML = '<i class="fas fa-save mr-1"></i> Save';
+    button.textContent = 'Save';
   }
 }
 
@@ -116,7 +130,8 @@ export function initPostForm({ formId, defaultValue, onSubmit }) {
   setFormValue(form, defaultValue);
 
   //init events
-  initRandomImages(form);
+  initRandomImage(form);
+  initRadioImageSource(form);
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
