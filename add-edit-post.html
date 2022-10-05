@@ -101,6 +101,7 @@
                 <textarea class="form-control" name="description" rows="3"></textarea>
               </div>
 
+              <!-- RADIO LIST -->
               <div class="mb-3">
                 <div class="form-check">
                   <input
@@ -129,6 +130,7 @@
                 </div>
               </div>
 
+              <!-- RANDOM PICSUM -->
               <div class="form-group mb-3" data-id="imageSource" data-image-source="picsum">
                 <label for="postChangeImage">Image</label>
                 <small id="passwordHelpBlock" class="form-text text-muted">
@@ -145,9 +147,17 @@
                 </div>
               </div>
 
+              <!-- UPLOAD IMAGE-->
               <div class="input-group mb-3" data-id="imageSource" data-image-source="upload" hidden>
-                <input type="file" class="form-control" id="uploadImage" accept="image/*" />
+                <input
+                  type="file"
+                  name="image"
+                  class="form-control"
+                  id="uploadImage"
+                  accept="image/*"
+                />
                 <label class="input-group-text" for="uploadImage">Upload</label>
+                <div class="invalid-feedback"></div>
               </div>
 
               <div class="text-center">

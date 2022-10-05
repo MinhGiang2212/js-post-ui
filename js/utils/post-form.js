@@ -1,6 +1,11 @@
 import { randomNumber, setBackgroundImage, setFieldValue, setTextContent } from './common';
 import * as yup from 'yup';
 
+const imageSource = {
+  UPLOAD: 'upload',
+  PICSUM: 'picsum',
+};
+
 function setFormValue(form, formValues) {
   setFieldValue(form, '[name="title"]', formValues?.title);
   setFieldValue(form, '[name="author"]', formValues?.author);
@@ -37,7 +42,27 @@ function getPostSchema() {
         (value) => value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
     description: yup.string(),
-    imageUrl: yup.string().required('please random a background').url('please enter a valid URL'),
+    imageSource: yup
+      .string()
+      .required('please select a option')
+      .oneOf([imageSource.PICSUM, imageSource.UPLOAD], 'Invalid image source'),
+
+    imageUrl: yup.string().when('imageSource', {
+      is: imageSource.PICSUM,
+      then: yup.string().required('please random a background').url('please enter a valid URL'),
+    }),
+
+    image: yup.mixed().when('imageSource', {
+      is: imageSource.UPLOAD,
+      then: yup
+        .mixed()
+        .test('required', 'please select an image to upload', (file) => Boolean(file?.name))
+        .test('max-size-3mb', 'this image is too large (max is 3mb)', (file) => {
+          const fileSize = file?.size || 0;
+          const MAX_SIZE = 2 * 1024 * 1024;
+          return fileSize <= MAX_SIZE;
+        }),
+    }),
   });
 }
 
@@ -52,7 +77,7 @@ function setFieldError(form, name, error) {
 async function validatePostForm(form, formValues) {
   try {
     //reset previous error
-    ['title', 'author', 'imageUrl'].forEach((name) => setFieldError(form, name, ''));
+    ['title', 'author', 'imageUrl', 'image'].forEach((name) => setFieldError(form, name, ''));
 
     //start validating
     const schema = getPostSchema();
@@ -74,7 +99,7 @@ async function validatePostForm(form, formValues) {
   }
 
   const isValid = form.checkValidity();
-  if (!isValid) form.classList.add('was-validated');
+  form.classList.add('was-validated');
 
   return isValid;
 }
@@ -86,7 +111,6 @@ function initRandomImage(form) {
   randomButton.addEventListener('click', () => {
     const imageUrl = `https://picsum.photos/id/${randomNumber(1000)}/1368/400`;
     //hidden field
-    console.log('click');
     setFieldValue(form, '[name="imageUrl"]', imageUrl);
 
     setBackgroundImage(document, '#postHeroImage', imageUrl);
@@ -112,7 +136,7 @@ function initUploadImage(form) {
   if (!uploadImage) return;
 
   uploadImage.addEventListener('change', (event) => {
-    console.log('upload image', event.target.files[0]);
+    // console.log('upload image', event.target.files[0]);
 
     const file = event.target.files[0];
     if (file) {

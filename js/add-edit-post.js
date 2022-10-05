@@ -1,7 +1,21 @@
 import postApi from './api/postApi';
 import { initPostForm, toast } from './utils';
+function removeUnusedFields(formValues) {
+  const payload = { ...formValues };
+  if (payload.imageSource === 'picsum') {
+    delete payload.image;
+  } else {
+    delete payload.imageUrl;
+  }
+
+  delete payload.imageSource;
+
+  return payload;
+}
 async function handlerPostFormSubmit(formValues) {
-  console.log('submit from parent', formValues);
+  const payload = removeUnusedFields(formValues);
+  console.log('submit from parent', { formValues, payload });
+  return;
   try {
     //check add/edit post
     //S1: check id on URL(search params)
